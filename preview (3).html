@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Викуся ❤️</title>
+
+  <style>
+    :root {
+      --ios-blue: #007aff;
+      --ios-red: #ff3b30;
+      --ios-green: #34c759;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+      background: #000;
+      /* Убираем выделение и стандартные системные меню при долгом нажатии */
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+      /* Оптимизация для плавной прокрутки на iOS */
+      -webkit-overflow-scrolling: touch;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* --- ЭКРАН БЛОКИРОВКИ --- */
+    #lock {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(to bottom, #1a1a2e, #000);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 9999;
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .notch {
+      width: 160px; height: 30px; background: #000;
+      border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+      position: absolute; top: 0;
+    }
+
+    .status-bar {
+      width: 90%;
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      /* Учитываем челку iPhone */
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .time {
+      font-size: 80px;
+      font-weight: 200;
+      margin-top: 40px;
+      letter-spacing: -2px;
+    }
+
+    .date {
+      font-size: 22px;
+      font-weight: 400;
+      margin-top: -10px;
+    }
+
+    .lock-footer {
+      position: absolute;
+      bottom: 50px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .icon-circle {
+      width: 50px;
+      height: 50px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(15px);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+    }
+
+    /* --- ЭКРАН ЗВОНКА --- */
+    .call-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #1c1c1e;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10002;
+      padding-top: 60px;
+    }
+
+    .caller-info h2 {
+      font-size: 32px;
+      margin: 0;
+      font-weight: 400;
+    }
+
+    .caller-info p {
+      color: #8e8e93;
+      font-size: 18px;
+    }
+
+    .call-actions {
+      position: absolute;
+      bottom: 80px;
+      width: 100%;
+      display: flex;
+      justify-content: space-evenly;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .action-circle {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+      border: none;
+      cursor: pointer;
+      color: white;
+    }
+
+    /* --- ОБЩИЕ ЭКРАНЫ --- */
+    .screen {
+      display: none;
+      height: 100vh;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    input#code {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      color: white;
+      font-size: 32px;
+      text-align: center;
+      width: 160px;
+      margin: 30px 0;
+      letter-spacing: 5px;
+      outline: none;
+      /* Убираем стандартный стиль iOS для инпутов */
+      -webkit-appearance: none;
+    }
+
+    .unlock-btn {
+      padding: 14px 35px;
+      border: none;
+      border-radius: 25px;
+      background: var(--ios-blue);
+      color: white;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .photo {
+      width: 85%;
+      max-width: 380px;
+      border-radius: 24px;
+      margin-bottom: 30px;
+    }
+
+    #final-text {
+      font-size: 22px;
+      white-space: pre-line;
+      line-height: 1.6;
+      max-width: 320px;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10005;
+    }
+
+    /* --- АНИМАЦИЯ ТОРТА --- */
+    .cake-container {
+      font-size: 100px;
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      transition: transform 0.2s;
+      touch-action: manipulation;
+    }
+
+    .cake-container:active {
+      transform: scale(0.9);
+    }
+
+    .candle-flame {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 30px;
+      animation: flicker 0.6s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1.1) rotate(2deg); }
+    }
+    
+    .apple-logo {
+      width: 80px;
+      height: 100px;
+      fill: white;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<div id="lock">
+  <div class="notch"></div>
+  <div class="status-bar"><span>Tele2</span><span>🔋 100%</span></div>
+  <div class="time" id="time">00:00</div>
+  <div class="date">вторник, 23 апреля</div>
+  <div class="lock-footer">
+    <div class="icon-circle">🔦</div>
+    <button class="unlock-btn" onclick="startBoot()">Открыть</button>
+    <div class="icon-circle">📷</div>
+  </div>
+</div>
+
+<div id="boot" class="screen" style="background: #000; z-index: 10001;">
+  <svg class="apple-logo" viewBox="0 0 384 512">
+    <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 21.8-88.5 21.8-11.4 0-51.1-20.8-82.3-20.8-40.8 0-78.3 23.1-99.3 59.7-43.7 76.3-11.1 188.7 31.3 250 21.6 31.2 47.3 65.9 80.5 64.7 32.2-1.2 44.5-20.8 83.5-20.8 38.8 0 50.1 20.8 83.5 20.1 34.3-.7 56.4-31.2 78.1-62.5 25-36.1 35.2-71.1 35.5-73-.9-.4-68.4-26.2-68.6-104.9zM230.1 81.3c21.2-25.5 35.6-61 31.7-96.3-30.4 1.2-67.2 20.3-89 45.8-19.5 22.8-36.6 59-32.7 93.1 33.7 2.6 68.8-17.1 90-42.6z"/>
+  </svg>
+</div>
+
+<div id="s1" class="screen">
+  <h2>Введите пароль</h2>
+  <input type="password" id="code" inputmode="numeric" maxlength="4" placeholder="••••">
+  <button class="unlock-btn" onclick="checkCode()">Войти</button>
+</div>
+
+<div id="s2" class="screen">
+  <h2>Найди 3 подарка 🎁</h2>
+  <div id="game" style="position:relative; width:100%; height:300px;"></div>
+  <h3 id="counter">0 / 3</h3>
+</div>
+
+<div id="call" class="call-screen">
+  <div class="caller-info">
+    <h2>Магарам💗</h2>
+    <p>сотовый</p>
+  </div>
+
+  <div class="call-actions">
+    <button class="action-circle" style="background: var(--ios-red);" onclick="showScreen('s3')">✖</button>
+    <button class="action-circle" style="background: var(--ios-green);" onclick="acceptCall()">📞</button>
+  </div>
+</div>
+
+<div id="s-pre" class="screen">
+  <div id="pre-call-text"></div>
+</div>
+
+<div id="s3" class="screen">
+  <img class="photo" src="https://via.placeholder.com/400x600?text=Фото+1">
+  <button class="unlock-btn" onclick="showScreen('s4')">Дальше</button>
+</div>
+
+<div id="s4" class="screen">
+  <img class="photo" src="https://via.placeholder.com/400x600?text=Фото+2">
+  <button class="unlock-btn" onclick="showScreen('s5')">Дальше</button>
+</div>
+
+<div id="s5" class="screen">
+  <img class="photo" src="https://via.placeholder.com/400x600?text=Фото+3">
+  <button class="unlock-btn" onclick="showScreen('s6')">Дальше</button>
+</div>
+
+<div id="s6" class="screen">
+  <h2 style="margin-bottom: 40px;">Загадай желание</h2>
+  <div class="cake-container" onclick="finish()">
+    <div class="candle-flame" id="flame">🔥</div>
+    🎂
+  </div>
+  <p style="margin-top: 20px; opacity: 0.7;">(Нажми на торт, чтобы задуть свечу)</p>
+</div>
+
+<div id="s7" class="screen">
+  <div id="final-text"></div>
+</div>
+
+<script>
+// Чтобы на iOS не было задержки клика в 300мс
+if ('addEventListener' in document) {
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.addEventListener('touchstart', function() {}, false);
+    }, false);
+}
+
+function updateTime(){
+  const now = new Date();
+  document.getElementById("time").innerText =
+    now.getHours().toString().padStart(2,"0") + ":" +
+    now.getMinutes().toString().padStart(2,"0");
+}
+setInterval(updateTime,1000); updateTime();
+
+function showScreen(id){
+  document.querySelectorAll(".screen,.call-screen").forEach(e=>e.style.display="none");
+  document.getElementById(id).style.display="flex";
+}
+
+function startBoot(){
+  document.getElementById("lock").style.transform="translateY(-100%)";
+  setTimeout(()=>{ 
+    showScreen("boot"); 
+    setTimeout(() => { showScreen("s1"); }, 2500); 
+  }, 400); 
+}
+
+function checkCode(){
+  if(document.getElementById("code").value==="2304"){
+    showScreen("s2");
+    initGame();
+  } else {
+    alert("Неверно");
+  }
+}
+
+let gifts=0;
+function initGame(){
+  const g=document.getElementById("game");
+  g.innerHTML="";
+  gifts=0;
+  for(let i=0;i<3;i++){
+    const el=document.createElement("span");
+    el.innerText="🎁";
+    el.style.position="absolute";
+    el.style.fontSize="40px";
+    el.style.cursor="pointer";
+    el.style.left=Math.random()*80+"%";
+    el.style.top=Math.random()*80+"%";
+    // Обработка касания специально для iPhone
+    el.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      el.remove();
+      gifts++;
+      document.getElementById("counter").innerText=gifts+" / 3";
+      if(gifts===3) setTimeout(()=>showScreen("call"),500);
+    });
+    // Оставляем onclick для ПК
+    el.onclick=()=>{ 
+      el.remove(); 
+      gifts++; 
+      document.getElementById("counter").innerText=gifts+" / 3"; 
+      if(gifts===3) setTimeout(()=>showScreen("call"),500); 
+    };
+    g.appendChild(el);
+  }
+}
+
+function acceptCall(){
+  showScreen("s-pre");
+  const t=document.getElementById("pre-call-text");
+  t.innerText="Викуся, я тебя люблю...";
+  setTimeout(()=>{
+    t.innerText="Сейчас будет сюрприз...";
+    setTimeout(()=>showScreen("s3"),2000);
+  },2000);
+}
+
+/* confetti */
+const c=document.getElementById("confetti-canvas");
+const ctx=c.getContext("2d");
+let p=[]; 
+function resize(){ c.width=innerWidth; c.height=innerHeight; }
+resize(); addEventListener("resize",resize);
+
+function particle(){
+  return {x:Math.random()*c.width,y:-10,s:Math.random()*6+3,v:Math.random()*3+2,c:`hsl(${Math.random()*360},80%,60%)`};
+}
+
+function draw(){
+  ctx.clearRect(0,0,c.width,c.height);
+  p.forEach((o,i)=>{
+    o.y+=o.v;
+    ctx.fillStyle=o.c;
+    ctx.fillRect(o.x,o.y,o.s,o.s);
+    if(o.y>c.height)p[i]=particle();
+  });
+  requestAnimationFrame(draw);
+}
+
+function finish(){
+  const flame = document.getElementById('flame');
+  if(flame) flame.style.display = 'none';
+
+  for(let i=0;i<150;i++)p.push(particle());
+  draw();
+
+  showScreen("s7");
+  const text="С Днём Рождения ❤️\n\nТы — чудо.";
+  let i=0;
+  function type(){
+    if(i<text.length){
+      document.getElementById("final-text").innerHTML+=text[i++];
+      setTimeout(type,60);
+    }
+  }
+  type();
+}
+</script>
+
+</body>
+</html>
